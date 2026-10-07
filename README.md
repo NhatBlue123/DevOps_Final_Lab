@@ -13,6 +13,7 @@
 **User Management API** is a production-ready cloud backend service designed with DevOps best practices. The project demonstrates an automated CI/CD lifecycle using **GitHub Actions**, containerization with **Docker** and **Docker Compose**, and deployment to **Amazon Web Services (AWS)**.
 
 ### Core Capabilities
+
 - **RESTful API**: Fast and robust API built with **FastAPI** and **Pydantic v2**.
 - **Database Persistence**: Object-relational mapping (ORM) with **SQLAlchemy**, supporting **PostgreSQL** (AWS RDS or containerized) and SQLite for local development.
 - **Cloud Object Storage**: File upload and asset management integrated with **Amazon Simple Storage Service (AWS S3)** via `boto3`.
@@ -45,7 +46,7 @@ flowchart TD
             GitPull["git pull origin main"]
             DockerBuild["docker compose build"]
             DockerRun["docker compose up -d"]
-            
+
             subgraph Containers["Docker Compose Runtime"]
                 AppBackend["FastAPI Container (Port 8000)"]
                 AppDB["PostgreSQL Container (Port 5432)"]
@@ -76,10 +77,12 @@ flowchart TD
 Ensure you have the following accounts and tools installed before getting started:
 
 ### Accounts
+
 - **GitHub Account**: To host the repository and execute GitHub Actions workflows.
 - **AWS Account**: Free Tier eligible account with access to EC2, S3, and IAM.
 
 ### Local Development Tools
+
 - **Git** (>= 2.30)
 - **Docker** (>= 24.0) & **Docker Compose** (>= 2.20)
 - **Python** (>= 3.11)
@@ -92,23 +95,28 @@ Ensure you have the following accounts and tools installed before getting starte
 ### Option A: Running with Docker Compose (Recommended)
 
 1. **Clone the repository:**
+
    ```bash
    git clone https://github.com/NhatBlue123/DevOps_Final_Lab.git
    cd DevOps_Final_Lab
    ```
 
 2. **Configure environment variables:**
+
    ```bash
    cp .env.example .env
    ```
-   *(Update `.env` with your desired configuration if needed).*
+
+   _(Update `.env` with your desired configuration if needed)._
 
 3. **Start the application services:**
+
    ```bash
    docker compose up -d --build
    ```
 
 4. **Verify running containers:**
+
    ```bash
    docker compose ps
    ```
@@ -128,6 +136,7 @@ Ensure you have the following accounts and tools installed before getting starte
 ### Option B: Running Locally with Python Virtual Environment
 
 1. **Navigate to the backend directory and create virtual environment:**
+
    ```bash
    cd backend
    python -m venv venv
@@ -144,17 +153,20 @@ Ensure you have the following accounts and tools installed before getting starte
      ```
 
 3. **Install dependencies:**
+
    ```bash
    pip install --upgrade pip
    pip install -r requirements.txt
    ```
 
 4. **Run the FastAPI development server:**
+
    ```bash
    uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
    ```
 
 5. **Run Linting and Unit Tests:**
+
    ```bash
    # PEP8 code styling
    flake8 --config=.flake8 app/ tests/
@@ -169,14 +181,14 @@ Ensure you have the following accounts and tools installed before getting starte
 
 The following AWS resources are provisioned for this project:
 
-| AWS Resource | Name / Type | Purpose | Configuration Details |
-|---|---|---|---|
-| **Amazon EC2** | `t2.micro` or `t3.micro` | Host containerized application | Ubuntu 22.04 LTS, Docker & Docker Compose installed |
-| **Security Group** | `app-ec2-sg` | Network firewall for EC2 | Inbound rules: `22` (SSH), `8000` (FastAPI API), `80` (HTTP) |
-| **AWS S3 Bucket** | e.g. `devops-final-app-bucket` | Object storage for uploaded files | Private bucket with IAM programmatic access |
-| **AWS IAM User** | `github-actions-deployer` | Access delegation | Policies: `AmazonS3FullAccess` |
-| **AWS Key Pair** | `devops-key.pem` | Secure SSH authentication | Used by GitHub Actions runner to connect to EC2 |
-| **AWS RDS (Optional)** | `db.t3.micro` PostgreSQL | Production managed database | Multi-AZ disabled for Free Tier |
+| AWS Resource           | Name / Type                    | Purpose                           | Configuration Details                                        |
+| ---------------------- | ------------------------------ | --------------------------------- | ------------------------------------------------------------ |
+| **Amazon EC2**         | `t2.micro` or `t3.micro`       | Host containerized application    | Ubuntu 22.04 LTS, Docker & Docker Compose installed          |
+| **Security Group**     | `app-ec2-sg`                   | Network firewall for EC2          | Inbound rules: `22` (SSH), `8000` (FastAPI API), `80` (HTTP) |
+| **AWS S3 Bucket**      | e.g. `devops-final-app-bucket` | Object storage for uploaded files | Private bucket with IAM programmatic access                  |
+| **AWS IAM User**       | `github-actions-deployer`      | Access delegation                 | Policies: `AmazonS3FullAccess`                               |
+| **AWS Key Pair**       | `devops-key.pem`               | Secure SSH authentication         | Used by GitHub Actions runner to connect to EC2              |
+| **AWS RDS (Optional)** | `db.t3.micro` PostgreSQL       | Production managed database       | Multi-AZ disabled for Free Tier                              |
 
 ---
 
@@ -184,16 +196,16 @@ The following AWS resources are provisioned for this project:
 
 The application and CI/CD pipeline require the following environment variables:
 
-| Variable Name | Description | Required In | Example / Value |
-|---|---|---|---|
-| `DATABASE_URL` | SQLAlchemy PostgreSQL connection URL | `.env` / GitHub Secret | `postgresql+psycopg2://postgres:postgres123@db:5432/userdb` |
-| `AWS_ACCESS_KEY_ID` | AWS IAM programmatic access key ID | `.env` / GitHub Secret | `AKIAIOSFODNN7EXAMPLE` |
-| `AWS_SECRET_ACCESS_KEY` | AWS IAM programmatic secret access key | `.env` / GitHub Secret | `wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY` |
-| `AWS_REGION` | AWS Region where S3 bucket resides | `.env` | `ap-southeast-1` (Singapore) / `us-east-1` |
-| `S3_BUCKET_NAME` | Name of the AWS S3 Bucket | `.env` / GitHub Secret | `devops-final-app-storage` |
-| `EC2_HOST` | Public IPv4 address or Public DNS of EC2 | GitHub Secret | `54.254.123.45` |
-| `EC2_SSH_KEY` | Content of the `.pem` private SSH key | GitHub Secret | `-----BEGIN RSA PRIVATE KEY----- ... -----END RSA PRIVATE KEY-----` |
-| `EC2_USER` | EC2 SSH username (Default: `ubuntu`) | GitHub Secret (Optional) | `ubuntu` (or `ec2-user`) |
+| Variable Name           | Description                              | Required In              | Example / Value                                                     |
+| ----------------------- | ---------------------------------------- | ------------------------ | ------------------------------------------------------------------- |
+| `DATABASE_URL`          | SQLAlchemy PostgreSQL connection URL     | `.env` / GitHub Secret   | `postgresql+psycopg2://postgres:postgres123@db:5432/userdb`         |
+| `AWS_ACCESS_KEY_ID`     | AWS IAM programmatic access key ID       | `.env` / GitHub Secret   | `AKIAIOSFODNN7EXAMPLE`                                              |
+| `AWS_SECRET_ACCESS_KEY` | AWS IAM programmatic secret access key   | `.env` / GitHub Secret   | `wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY`                          |
+| `AWS_REGION`            | AWS Region where S3 bucket resides       | `.env`                   | `ap-southeast-1` (Singapore) / `us-east-1`                          |
+| `S3_BUCKET_NAME`        | Name of the AWS S3 Bucket                | `.env` / GitHub Secret   | `devops-final-app-storage`                                          |
+| `EC2_HOST`              | Public IPv4 address or Public DNS of EC2 | GitHub Secret            | `54.254.123.45`                                                     |
+| `EC2_SSH_KEY`           | Content of the `.pem` private SSH key    | GitHub Secret            | `-----BEGIN RSA PRIVATE KEY----- ... -----END RSA PRIVATE KEY-----` |
+| `EC2_USER`              | EC2 SSH username (Default: `ubuntu`)     | GitHub Secret (Optional) | `ubuntu` (or `ec2-user`)                                            |
 
 ---
 
@@ -208,6 +220,7 @@ The application and CI/CD pipeline require the following environment variables:
    ssh -i /path/to/devops-key.pem ubuntu@<EC2_PUBLIC_IP>
    ```
 4. Install Docker and Docker Compose plugin on the instance:
+
    ```bash
    sudo apt-get update
    sudo apt-get install -y ca-certificates curl gnupg lsb-release git
@@ -226,6 +239,7 @@ The application and CI/CD pipeline require the following environment variables:
    sudo usermod -aG docker $USER
    newgrp docker
    ```
+
 5. Verify Docker setup:
    ```bash
    docker --version
@@ -241,21 +255,22 @@ In your GitHub repository, navigate to:
 
 Create each of the following 6 secrets:
 
-| Secret Name | Secret Value |
-|---|---|
-| `EC2_HOST` | Public IPv4 Address of your EC2 instance (e.g. `54.254.123.45`) |
-| `EC2_SSH_KEY` | Entire content of your `.pem` SSH Private Key file |
-| `AWS_ACCESS_KEY_ID` | Your IAM Access Key ID |
-| `AWS_SECRET_ACCESS_KEY` | Your IAM Secret Access Key |
-| `S3_BUCKET_NAME` | Your AWS S3 Bucket Name |
-| `DATABASE_URL` | `postgresql+psycopg2://postgres:postgres123@db:5432/userdb` |
-| `EC2_USER` *(Optional)* | `ubuntu` (default if omitted) |
+| Secret Name             | Secret Value                                                    |
+| ----------------------- | --------------------------------------------------------------- |
+| `EC2_HOST`              | Public IPv4 Address of your EC2 instance (e.g. `54.254.123.45`) |
+| `EC2_SSH_KEY`           | Entire content of your `.pem` SSH Private Key file              |
+| `AWS_ACCESS_KEY_ID`     | Your IAM Access Key ID                                          |
+| `AWS_SECRET_ACCESS_KEY` | Your IAM Secret Access Key                                      |
+| `S3_BUCKET_NAME`        | Your AWS S3 Bucket Name                                         |
+| `DATABASE_URL`          | `postgresql+psycopg2://postgres:postgres123@db:5432/userdb`     |
+| `EC2_USER` _(Optional)_ | `ubuntu` (default if omitted)                                   |
 
 ---
 
 ### Step 7.3: Trigger Automated CI/CD Pipeline
 
 1. **Commit and push changes to the `main` branch:**
+
    ```bash
    git add .
    git commit -m "feat: complete Part 6 CI/CD pipeline with GitHub Actions"
@@ -288,24 +303,25 @@ Interactive Swagger documentation is automatically available at:
 
 ### Summary of Endpoints
 
-| Method | Endpoint | Description | Request Body | Response Codes |
-|---|---|---|---|---|
-| `GET` | `/` | Root service info | None | `200 OK` |
-| `GET` | `/health` | Application healthcheck | None | `200 OK` |
-| `GET` | `/users/` | Get list of users (pagination: `skip`, `limit`) | None | `200 OK` |
-| `POST` | `/users/` | Create a new user | JSON (`name`, `email`, `phone`, `role`) | `201 Created`, `400 Bad Request` |
-| `GET` | `/users/{id}` | Get user details by ID | None | `200 OK`, `404 Not Found` |
-| `PUT` | `/users/{id}` | Update existing user information | JSON (`name`, `email`, `phone`, `role`, `is_active`) | `200 OK`, `400 Bad Request`, `404 Not Found` |
-| `DELETE` | `/users/{id}` | Delete user by ID | None | `204 No Content`, `404 Not Found` |
-| `GET` | `/s3/status` | Check AWS S3 connectivity status | None | `200 OK` |
-| `POST` | `/s3/upload` | Upload a file to AWS S3 Bucket | `multipart/form-data` (`file`) | `201 Created`, `400`, `503` |
-| `GET` | `/s3/files` | List all files stored in S3 Bucket | Query: `prefix` (optional) | `200 OK`, `400`, `503` |
+| Method   | Endpoint      | Description                                     | Request Body                                         | Response Codes                               |
+| -------- | ------------- | ----------------------------------------------- | ---------------------------------------------------- | -------------------------------------------- |
+| `GET`    | `/`           | Root service info                               | None                                                 | `200 OK`                                     |
+| `GET`    | `/health`     | Application healthcheck                         | None                                                 | `200 OK`                                     |
+| `GET`    | `/users/`     | Get list of users (pagination: `skip`, `limit`) | None                                                 | `200 OK`                                     |
+| `POST`   | `/users/`     | Create a new user                               | JSON (`name`, `email`, `phone`, `role`)              | `201 Created`, `400 Bad Request`             |
+| `GET`    | `/users/{id}` | Get user details by ID                          | None                                                 | `200 OK`, `404 Not Found`                    |
+| `PUT`    | `/users/{id}` | Update existing user information                | JSON (`name`, `email`, `phone`, `role`, `is_active`) | `200 OK`, `400 Bad Request`, `404 Not Found` |
+| `DELETE` | `/users/{id}` | Delete user by ID                               | None                                                 | `204 No Content`, `404 Not Found`            |
+| `GET`    | `/s3/status`  | Check AWS S3 connectivity status                | None                                                 | `200 OK`                                     |
+| `POST`   | `/s3/upload`  | Upload a file to AWS S3 Bucket                  | `multipart/form-data` (`file`)                       | `201 Created`, `400`, `503`                  |
+| `GET`    | `/s3/files`   | List all files stored in S3 Bucket              | Query: `prefix` (optional)                           | `200 OK`, `400`, `503`                       |
 
 ---
 
 ### Example cURL Requests
 
 #### 1. Create a User
+
 ```bash
 curl -X POST "http://localhost:8000/users/" \
   -H "Content-Type: application/json" \
@@ -318,11 +334,13 @@ curl -X POST "http://localhost:8000/users/" \
 ```
 
 #### 2. Get Users List
+
 ```bash
 curl -X GET "http://localhost:8000/users/?skip=0&limit=10"
 ```
 
 #### 3. Upload File to AWS S3
+
 ```bash
 curl -X POST "http://localhost:8000/s3/upload" \
   -H "accept: application/json" \
@@ -331,6 +349,7 @@ curl -X POST "http://localhost:8000/s3/upload" \
 ```
 
 #### 4. List Files from S3 Bucket
+
 ```bash
 curl -X GET "http://localhost:8000/s3/files"
 ```
@@ -342,13 +361,15 @@ curl -X GET "http://localhost:8000/s3/files"
 Below are screenshots verifying AWS resource setup and verification:
 
 ### 9.1 IAM User Creation & Policies
-| IAM User Creation | Attached Policies |
-|---|---|
+
+| IAM User Creation                                      | Attached Policies                                 |
+| ------------------------------------------------------ | ------------------------------------------------- |
 | ![IAM User Creation](sceenshots/IAM_user_creation.jpg) | ![Attach Policies](sceenshots/attachpolicies.jpg) |
 
 ### 9.2 AWS Infrastructure & Verification
-| AWS RDS PostgreSQL Database | AWS STS Caller Identity Verification |
-|---|---|
+
+| AWS RDS PostgreSQL Database    | AWS STS Caller Identity Verification                                         |
+| ------------------------------ | ---------------------------------------------------------------------------- |
 | ![AWS RDS](sceenshots/rds.jpg) | ![AWS STS Verification](sceenshots/vertication_aws_sts_get_caller_inden.jpg) |
 
 ---
@@ -361,3 +382,5 @@ Below are screenshots verifying AWS resource setup and verification:
 - [x] **GitHub Actions Workflow**: `.github/workflows/deploy.yml` with lint, test, SSH EC2 deployment, image rebuild, container restart, and healthcheck.
 - [x] **README.md**: Complete 8-part documentation with architecture diagram, prerequisites, setup, AWS resources, environment variables, deployment steps, and API docs.
 - [x] **Screenshots**: AWS IAM, Policies, RDS, and AWS CLI verification captured in `sceenshots/`.
+
+#### ENDD
