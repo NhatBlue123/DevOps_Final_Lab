@@ -190,6 +190,12 @@ The following AWS resources are provisioned for this project:
 | **AWS Key Pair**       | `devops-key.pem`               | Secure SSH authentication         | Used by GitHub Actions runner to connect to EC2              |
 | **AWS RDS (Optional)** | `db.t3.micro` PostgreSQL       | Production managed database       | Multi-AZ disabled for Free Tier                              |
 
+### 5.1 AWS Setup Screenshots
+
+| IAM User Creation & Policies | AWS RDS & STS Caller Identity |
+| ------------------------------------------------------ | ---------------------------------------------------------------------------- |
+| ![IAM User Creation](sceenshots/IAM_user_creation.jpg)<br>![Attach Policies](sceenshots/attachpolicies.jpg) | ![AWS RDS](sceenshots/rds.jpg)<br>![AWS STS Verification](sceenshots/vertication_aws_sts_get_caller_inden.jpg) |
+
 ---
 
 ## 6. Environment Variables
@@ -296,12 +302,12 @@ Create each of the following 6 secrets:
 
 ---
 
-## 8. API Documentation
+## 8. API Documentation (Available Endpoints and Usage)
 
 Interactive Swagger documentation is automatically available at:
 `http://<EC2_PUBLIC_IP>:8000/docs` or `http://localhost:8000/docs`
 
-### Summary of Endpoints
+### Available Endpoints
 
 | Method   | Endpoint      | Description                                     | Request Body                                         | Response Codes                               |
 | -------- | ------------- | ----------------------------------------------- | ---------------------------------------------------- | -------------------------------------------- |
@@ -355,32 +361,3 @@ curl -X GET "http://localhost:8000/s3/files"
 ```
 
 ---
-
-## 9. Screenshots & Proof of Deployment
-
-Below are screenshots verifying AWS resource setup and verification:
-
-### 9.1 IAM User Creation & Policies
-
-| IAM User Creation                                      | Attached Policies                                 |
-| ------------------------------------------------------ | ------------------------------------------------- |
-| ![IAM User Creation](sceenshots/IAM_user_creation.jpg) | ![Attach Policies](sceenshots/attachpolicies.jpg) |
-
-### 9.2 AWS Infrastructure & Verification
-
-| AWS RDS PostgreSQL Database    | AWS STS Caller Identity Verification                                         |
-| ------------------------------ | ---------------------------------------------------------------------------- |
-| ![AWS RDS](sceenshots/rds.jpg) | ![AWS STS Verification](sceenshots/vertication_aws_sts_get_caller_inden.jpg) |
-
----
-
-## 10. Submission Deliverables Checklist
-
-- [x] **Source Code**: FastAPI application with modular architecture (`api`, `models`, `schemas`, `config`, `database`).
-- [x] **Dockerfile**: Multi-stage build with security hardening (non-root `appuser`) and container `HEALTHCHECK`.
-- [x] **docker-compose.yml**: Multi-container setup for `db` (PostgreSQL) and `backend` with all required environment variables.
-- [x] **GitHub Actions Workflow**: `.github/workflows/deploy.yml` with lint, test, SSH EC2 deployment, image rebuild, container restart, and healthcheck.
-- [x] **README.md**: Complete 8-part documentation with architecture diagram, prerequisites, setup, AWS resources, environment variables, deployment steps, and API docs.
-- [x] **Screenshots**: AWS IAM, Policies, RDS, and AWS CLI verification captured in `sceenshots/`.
-
-#### ENDD
