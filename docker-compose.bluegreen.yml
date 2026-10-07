@@ -1,0 +1,73 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: app_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres123}
+      POSTGRES_DB: ${POSTGRES_DB:-userdb}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - app_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-userdb}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  backend_blue:
+    image: ${BACKEND_IMAGE:-app_backend}:${IMAGE_TAG:-latest}
+    container_name: app_backend_blue
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg2://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres123}@db:5432/${POSTGRES_DB:-userdb}}
+    expose:
+      - "8000"
+    networks:
+      - app_network
+    depends_on:
+      db:
+        condition: service_healthy
+
+  backend_green:
+    image: ${BACKEND_IMAGE:-app_backend}:${IMAGE_TAG:-latest}
+    container_name: app_backend_green
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg2://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres123}@db:5432/${POSTGRES_DB:-userdb}}
+    expose:
+      - "8000"
+    networks:
+      - app_network
+    depends_on:
+      db:
+        condition: service_healthy
+
+  router:
+    image: nginx:alpine
+    container_name: app_router
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx:/etc/nginx/conf.d:ro
+      - ./certs:/etc/nginx/certs:ro
+    networks:
+      - app_network
+    depends_on:
+      - backend_blue
+
+volumes:
+  postgres_data:
+    name: app_postgres_data
+
+networks:
+  app_network:
+    name: app_network
+    driver: bridge

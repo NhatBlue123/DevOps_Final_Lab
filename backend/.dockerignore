@@ -1,0 +1,43 @@
+# Virtual Environments
+venv/
+.venv/
+env/
+
+# Python Cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# IDE & Editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Testing & Coverage
+tests/
+test_*.py
+pytest.ini
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+.flake8
+
+# Documentation & Misc
+*.md
+README*
+.DS_Store
+Thumbs.db

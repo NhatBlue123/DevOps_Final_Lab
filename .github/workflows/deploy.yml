@@ -1,0 +1,108 @@
+name: CI/CD Pipeline with GitHub Actions
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Lint & Test (CI)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: 'backend/requirements.txt'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+
+      - name: Code Quality & PEP8 Linter (Flake8)
+        run: |
+          echo "=== Running Flake8 Linter ==="
+          flake8 --config=backend/.flake8 backend/app backend/tests
+
+      - name: Run Pytest Unit Tests & Coverage
+        run: |
+          echo "=== Running Pytest Unit Tests ==="
+          pytest -v --cov=app --cov-report=term backend/tests/
+
+  deploy:
+    name: Deploy to AWS EC2 (CD)
+    needs: test
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to EC2 via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER || 'ubuntu' }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          envs: GITHUB_REPOSITORY
+          script: |
+            set -e
+            echo "=========================================================="
+            echo "  STARTING GITHUB ACTIONS CI/CD DEPLOYMENT ON AWS EC2"
+            echo "=========================================================="
+
+            APP_DIR=~/app
+
+            # 1. Clone repository if first time or navigate into existing directory
+            if [ ! -d "$APP_DIR" ]; then
+              echo ">>> [1/5] Cloning repository into $APP_DIR..."
+              git clone "https://github.com/${GITHUB_REPOSITORY}.git" "$APP_DIR"
+            fi
+
+            cd "$APP_DIR"
+
+            # 2. Pull the latest code from GitHub
+            echo ">>> [2/5] Pulling latest changes from main branch..."
+            git fetch origin main
+            git reset --hard origin/main
+
+            # 3. Configure production environment variables (.env) from GitHub Secrets
+            echo ">>> [3/5] Updating production environment (.env)..."
+            cat << 'EOF' > .env
+            DATABASE_URL=${{ secrets.DATABASE_URL }}
+            AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+            AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            S3_BUCKET_NAME=${{ secrets.S3_BUCKET_NAME }}
+            AWS_REGION=ap-southeast-1
+            POSTGRES_USER=postgres
+            POSTGRES_PASSWORD=postgres123
+            POSTGRES_DB=userdb
+            EOF
+
+            # 4. Detect compose command and rebuild image on the EC2 instance
+            echo ">>> [4/5] Rebuilding Docker image on the instance..."
+            COMPOSE_CMD="docker compose"
+            if ! docker compose version > /dev/null 2>&1; then
+              COMPOSE_CMD="docker-compose"
+            fi
+
+            $COMPOSE_CMD build backend
+
+            # 5. Restart the containers
+            echo ">>> [5/5] Restarting container services..."
+            $COMPOSE_CMD down
+            $COMPOSE_CMD up -d
+
+            # 6. Verify container health status
+            echo ">>> [Verification] Checking application health..."
+            sleep 8
+            $COMPOSE_CMD ps
+            curl -f http://localhost:8000/health || (echo "Healthcheck failed!" && exit 1)
+            echo ">>> Deployment successfully completed!"
