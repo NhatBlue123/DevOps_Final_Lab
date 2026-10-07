@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.database.db import engine, Base
-from app.api import users, s3
+from app.api import users, s3, files
 
 
 @asynccontextmanager
@@ -36,6 +36,7 @@ app.add_middleware(
 # Đăng ký router
 app.include_router(users.router)
 app.include_router(s3.router)
+app.include_router(files.router)
 
 
 @app.get("/", tags=["root"])
