@@ -1,3 +1,6 @@
+LINK DOMAIN:[DOMAIN](http://deepseek.fuji.io.vn./docs)
+
+
 # User Management API - DevOps CI/CD with GitHub Actions & AWS
 
 [![CI/CD Pipeline](https://github.com/NhatBlue123/DevOps_Final_Lab/actions/workflows/deploy.yml/badge.svg)](https://github.com/NhatBlue123/DevOps_Final_Lab/actions/workflows/deploy.yml)
